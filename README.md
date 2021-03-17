@@ -69,7 +69,7 @@ You can use POSTMAN or other API dev tool of your choice.
 
 1. Run your application using the command `node app.js`
 You should see in your terminal a message indicating that the server is listening in port 8000:
-![  ](snapshots/serverlistening.png)
+![  ](snapshots/serverlistening_.png)
 
 2. To make sure your application is working fine and it creates the Genesis Block you can use POSTMAN to request the Genesis block:
     ![Request: http://localhost:8000/block/height/0 ](snapshots/1-retrieve-the-genesis-block.png)
