@@ -219,15 +219,16 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            if (self.height > 0) {
-                for (var i = 1; i <= self.height; i++) {
+
+                for (var i = 0; i <= self.chain.height; i++) {
                     let block = self.chain[i];
                     let validation = await block.validate();
 
+                    console.log(validation);
+
                     if (!validation){
-                        console.log("ERROR VALIDATING DATA");
+                        errorLog.push(`Block validation failed for #${block.height}`);
                     } else if (block.previousBlockHash != self.chain[i-1].hash) {
-                        console.log("ERROR WITH PREVIOUS BLOCK HASH");
                         errorLog.push(`Invalid hash for block #${block.height}`);
                     }
                 }
@@ -236,9 +237,7 @@ class Blockchain {
                 } else {
                     resolve("Chain is valid.");
                 }
-            } else {
-                resolve("Chain height not set");
-            }
+
         });
     }
 
