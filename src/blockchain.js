@@ -63,36 +63,26 @@ class Blockchain {
      */
     _addBlock(block) {
         let self = this;
-
         return new Promise(async (resolve, reject) => {
-            //validate chain
-                let chainValidation = self.validateChain();
-
-                chainValidation.then(r => {
-                    // Set new block height
-                    block.height = self.height + 1;
-                    // Set timestamp for the new block
-                    block.time = new Date().getTime().toString().slice(0,-3);
-                    // If a previous block exist, get the previous blocks hash
-                    if (self.chain.length > 0) {
-                        block.previousBlockHash = self.chain[self.height].hash;
-                    }
-                    // New hash value for new block
-                    block.hash = SHA256(JSON.stringify(block)).toString();
-                    // Add block to chain
-                    self.chain.push(block);
-                    // Update the Height
-                    self.height += 1;
-
-                    if (self.chain[self.height] == block) {
-                        resolve(block);
-                    } else {
-                        reject(Error("Block was not added."));
-                    }
-                }).catch(e => {
-                    reject(Error("Chain validation failed. ", e));
-                });
-
+            // Set new block height
+            block.height = self.height + 1;
+            // Set timestamp for the new block
+            block.time = new Date().getTime().toString().slice(0,-3);
+            // If a previous block exist, get the previous blocks hash
+            if (self.chain.length > 0) {
+                block.previousBlockHash = self.chain[self.height].hash;
+            }
+            // New hash value for new block
+            block.hash = SHA256(JSON.stringify(block)).toString();
+            // Add block to chain
+            self.chain.push(block);
+            // Update the Height
+            self.height += 1;
+            if (self.chain[self.height] == block) {
+                resolve(block);
+            } else {
+                reject(Error("Block was not added."));
+            }
         });
     }
 
@@ -136,6 +126,7 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             let time = parseInt(message.split(':')[1]);
             let currentTime = parseInt(new Date().getTime().toString().slice(0,-3));
+
             if (time > currentTime - 300000) {
                 if(bitcoinMessage.verify(message, address, signature)) {
                     let block = new BlockClass.Block({"owner": address, "star": star});
@@ -220,22 +211,26 @@ class Blockchain {
                 for (var i = 1; i <= self.height; i++) {
                     let block = self.chain[i];
                     let validation = await block.validate();
-
                     if (!validation){
                         console.log("ERROR VALIDATING DATA");
                     } else if (block.previousBlockHash != self.chain[i-1].hash) {
                         console.log("ERROR WITH PREVIOUS BLOCK HASH");
-                        errorLog.push(`Invalid hash for block #${block.height}`);
                     }
                 }
-                if (errorLog.length > 0 ) {
-                    reject(errorLog);
+                if (errorLog) {
+                    resolve(errorLog);
                 } else {
                     resolve("Chain is valid.");
                 }
             } else {
-                resolve("Chain height not set");
+                reject(Error("Cannot validate chain.")).catch(error => {
+                    console.log('caught', error.message);
+                });
             }
+        }).then(successfulValidation => {
+            console.log(successfulValidation);
+        }).catch(unsuccessfulValidation => {
+            console.log(unsuccessfulValidation);
         });
     }
 
